@@ -1,0 +1,86 @@
+<!--
+  Tote handling cell: destack KLT totes and place them on a roller conveyor.
+  Layout mirrors an intralogistics tote-to-conveyor task. The robot is attached
+  at the "robot_mount" frame by tote_cell/build.py; x points forward from the robot.
+
+  Totes follow VDA KLT outer dimensions:
+    KLT 4147: 396 x 297 x 147 mm   KLT 3147: 297 x 198 x 147 mm
+-->
+<mujoco model="tote_cell">
+  <option timestep="0.002" integrator="implicitfast" cone="elliptic" impratio="10"/>
+
+  <visual>
+    <global offwidth="1600" offheight="1000" azimuth="150" elevation="-25"/>
+    <headlight ambient="0.35 0.35 0.35" diffuse="0.45 0.45 0.45" specular="0.05 0.05 0.05"/>
+    <quality shadowsize="4096"/>
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.74 0.74 0.72" rgb2="0.68 0.68 0.66"/>
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.82 0.85 0.88" rgb2="0.55 0.6 0.66" width="512" height="512"/>
+    <material name="floor" texture="grid" texrepeat="8 8" reflectance="0"/>
+    <material name="klt" rgba="0.18 0.35 0.62 1"/>
+    <material name="klt_small" rgba="0.55 0.58 0.62 1"/>
+    <material name="steel" rgba="0.45 0.46 0.48 1"/>
+    <material name="roller" rgba="0.72 0.73 0.75 1"/>
+    <material name="pallet" rgba="0.62 0.47 0.30 1"/>
+    <material name="zone" rgba="0.15 0.65 0.35 0.25"/>
+  </asset>
+
+  <default>
+    <default class="fixture">
+      <geom type="box" material="steel" friction="0.9 0.01 0.001"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light name="key" pos="1.5 -1.5 3.5" dir="-0.3 0.4 -1" diffuse="0.45 0.45 0.45" castshadow="true"/>
+    <light name="fill" pos="-1.5 1.5 3" dir="0.3 -0.3 -1" diffuse="0.3 0.3 0.3" castshadow="false"/>
+    <geom name="floor" type="plane" size="6 6 0.1" material="floor"/>
+
+    <frame name="robot_mount" pos="0 0 0"/>
+
+    <camera name="overview" pos="-1.3 2.4 2.1" xyaxes="-0.768 -0.640 0.000 0.292 -0.350 0.890"/>
+    <camera name="front" pos="2.9 0.35 1.65" xyaxes="-0.144 0.990 0.000 -0.377 -0.055 0.925"/>
+
+    <!-- Pick station: two pallets, large totes (KLT 4147) left, small totes (KLT 3147) further left -->
+    <body name="pallet_a" pos="0.75 0.55 0">
+      <geom name="pallet_a" type="box" size="0.25 0.2 0.225" pos="0 0 0.225" material="pallet"/>
+      <site name="stack_a" pos="0 0 0.45" size="0.01" rgba="1 0.6 0 1"/>
+    </body>
+    <body name="pallet_b" pos="0.75 1.15 0">
+      <geom name="pallet_b" type="box" size="0.2 0.15 0.225" pos="0 0 0.225" material="pallet"/>
+      <site name="stack_b" pos="0 0 0.45" size="0.01" rgba="1 0.6 0 1"/>
+    </body>
+
+    <!-- Roller conveyor along +x on the robot's right; the robot places totes at the near end,
+         people take them off at the far end -->
+    <body name="conveyor" pos="1.1 -0.6 0">
+      <geom name="conv_rail_l" class="fixture" size="0.9 0.02 0.04" pos="0 0.24 0.73"/>
+      <geom name="conv_rail_r" class="fixture" size="0.9 0.02 0.04" pos="0 -0.24 0.73"/>
+      <geom name="conv_leg_1l" class="fixture" size="0.025 0.025 0.35" pos="-0.8 0.2 0.35"/>
+      <geom name="conv_leg_1r" class="fixture" size="0.025 0.025 0.35" pos="-0.8 -0.2 0.35"/>
+      <geom name="conv_leg_2l" class="fixture" size="0.025 0.025 0.35" pos="0.0 0.2 0.35"/>
+      <geom name="conv_leg_2r" class="fixture" size="0.025 0.025 0.35" pos="0.0 -0.2 0.35"/>
+      <geom name="conv_leg_3l" class="fixture" size="0.025 0.025 0.35" pos="0.8 0.2 0.35"/>
+      <geom name="conv_leg_3r" class="fixture" size="0.025 0.025 0.35" pos="0.8 -0.2 0.35"/>
+      <geom name="conv_bed" type="box" size="0.9 0.22 0.005" pos="0 0 0.725" rgba="0 0 0 0" friction="0.6 0.01 0.001"/>
+      <geom name="roller_01" type="cylinder" size="0.025 0.22" pos="-0.825 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_02" type="cylinder" size="0.025 0.22" pos="-0.675 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_03" type="cylinder" size="0.025 0.22" pos="-0.525 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_04" type="cylinder" size="0.025 0.22" pos="-0.375 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_05" type="cylinder" size="0.025 0.22" pos="-0.225 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_06" type="cylinder" size="0.025 0.22" pos="-0.075 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_07" type="cylinder" size="0.025 0.22" pos="0.075 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_08" type="cylinder" size="0.025 0.22" pos="0.225 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_09" type="cylinder" size="0.025 0.22" pos="0.375 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_10" type="cylinder" size="0.025 0.22" pos="0.525 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_11" type="cylinder" size="0.025 0.22" pos="0.675 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <geom name="roller_12" type="cylinder" size="0.025 0.22" pos="0.825 0 0.73" zaxis="0 1 0" material="roller" contype="0" conaffinity="0"/>
+      <!-- Place zone (robot drops totes here) and pickup point (operators take them here) -->
+      <site name="place_zone" type="box" size="0.3 0.2 0.08" pos="-0.5 0 0.81" material="zone"/>
+      <site name="pickup_point" type="box" size="0.25 0.2 0.08" pos="0.6 0 0.81" rgba="0.2 0.45 0.9 0.2"/>
+    </body>
+  </worldbody>
+</mujoco>

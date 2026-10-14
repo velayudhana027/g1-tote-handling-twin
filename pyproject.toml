@@ -1,0 +1,10 @@
+[project]
+name = "g1-tote-handling-twin"
+version = "0.1.0"
+description = "Simulated tote-to-conveyor handling with a Unitree G1 humanoid in MuJoCo"
+requires-python = ">=3.10"
+dependencies = ["mujoco>=3.16", "numpy"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
